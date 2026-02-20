@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  pg_source:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: operational_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./init_source.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - etl_network
+
+  pg_dwh:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: data_warehouse
+    ports:
+      - "5433:5432" 
+    volumes:
+      - ./init_dwh.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - etl_network
+  
+  airflow:
+    image: apache/airflow:2.8.1
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=SequentialExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=sqlite:////opt/airflow/airflow.db
+      - AIRFLOW__CORE__LOAD_EXAMPLES=False
+    volumes:
+      - ./dags:/opt/airflow/dags
+    ports:
+      - "8080:8080"
+    command: >
+      bash -c "airflow db migrate &&
+      airflow users create --username admin --password admin --firstname Admin --lastname Admin --role Admin --email admin@example.com &&
+      airflow standalone"
+    networks:
+      - etl_network
+  
+  metabase:
+    image: metabase/metabase:latest
+    ports:
+      - "3000:3000"
+    networks:
+      - etl_network
+
+networks:
+  etl_network:
+    driver: bridge
