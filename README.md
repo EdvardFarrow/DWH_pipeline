@@ -135,18 +135,6 @@ CALL dwh.process_sales_loyalty();
 
 ----------
 
-## Backup Management
-
-A shell script is provided to create logical schema-level backups (`pg_dump`) of the transit and DWH layers. To execute the backup:
-
-Bash
-```
-chmod +x backup.sh
-./backup.sh
-
-```
-
-SQL dumps will be securely generated in the `./backups` directory.
 
 ## Screenshots
 
