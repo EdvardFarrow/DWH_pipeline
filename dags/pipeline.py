@@ -77,16 +77,26 @@ with DAG(
         postgres_conn_id='pg_dwh_conn',
         sql="""
             TRUNCATE TABLE stg.stg_fact_sales, stg.stg_dim_customers, stg.stg_dim_products, stg.rejected_sales CASCADE;
-            
-            INSERT INTO stg.stg_dim_customers SELECT id, TRIM(name), UPPER(country) FROM mrr.mrr_dim_customers;
-            INSERT INTO stg.stg_dim_products SELECT * FROM mrr.mrr_dim_products;
-            
+
+            -- Remove spaces, capitalize, and eliminate possible duplicates
+            INSERT INTO stg.stg_dim_customers 
+            SELECT DISTINCT ON (id) id, TRIM(name), UPPER(country) 
+            FROM mrr.mrr_dim_customers 
+            ORDER BY id;
+
+            INSERT INTO stg.stg_dim_products 
+            SELECT DISTINCT ON (id) * FROM mrr.mrr_dim_products ORDER BY id;
+
             INSERT INTO stg.stg_fact_sales 
-            SELECT * FROM mrr.mrr_fact_sales WHERE qty > 0;
-            
+            SELECT DISTINCT ON (id) * FROM mrr.mrr_fact_sales 
+            WHERE qty > 0
+            ORDER BY id, updated_at DESC;
+
             INSERT INTO stg.rejected_sales (id, customerId, productId, qty, updated_at, reject_reason)
-            SELECT id, customerId, productId, qty, updated_at, 'Negative or zero quantity detected' 
-            FROM mrr.mrr_fact_sales WHERE qty <= 0;
+            SELECT DISTINCT ON (id) id, customerId, productId, qty, updated_at, 'Negative or zero quantity' 
+            FROM mrr.mrr_fact_sales 
+            WHERE qty <= 0
+            ORDER BY id, updated_at DESC;
         """
     )
 

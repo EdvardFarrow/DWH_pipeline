@@ -33,8 +33,12 @@ services:
       - AIRFLOW__CORE__EXECUTOR=SequentialExecutor
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=sqlite:////opt/airflow/airflow.db
       - AIRFLOW__CORE__LOAD_EXAMPLES=False
+      - AIRFLOW_CONN_PG_SOURCE_CONN=postgresql://admin:password@pg_source:5432/operational_db
+      - AIRFLOW_CONN_PG_DWH_CONN=postgresql://admin:password@pg_dwh:5432/data_warehouse
     volumes:
       - ./dags:/opt/airflow/dags
+      - ./scripts:/opt/airflow/scripts
+      - ./backups:/opt/airflow/backups
     ports:
       - "8080:8080"
     command: >
