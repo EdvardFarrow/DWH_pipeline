@@ -25,11 +25,11 @@ The entire infrastructure is containerized using **Docker Compose**.
 
 ## Architecture & Key Engineering Decisions
 
-### 1. Schemas
+### 1. Schema-based Logical Separation
 
-Using **Schemas** in the **PostgreSQL** ecosystem  within a single DWH database.
+The architecture utilizes PostgreSQL schemas (mrr, stg, dwh) within a single DWH database.
 
--   _Why:_ Creating separate physical databases in Postgres requires `postgres_fdw` for cross-database queries, which adds network overhead and kills performance. Using schemas (`mrr`, `stg`, `dwh`) provides the exact logical separation requested while allowing high-speed, native SQL transformations.
+-   _Why:_ Creating separate physical databases in Postgres requires `postgres_fdw` for cross-database queries, which adds network overhead and kills performance. Schema-based separation provides clean logical boundaries while allowing for high-speed, native SQL transformations.
     
 
 ### 2. Delta Load & Idempotency
@@ -49,14 +49,12 @@ Instead of silently dropping invalid data during the STG phase, a **Dead Letter 
 
 ### 4. Event Handlers & Logging
 
-The requirement to implement "Event Handlers" was translated to the Airflow ecosystem using **Callbacks** (`on_success_callback`, `on_failure_callback`).
-
--   If the DAG fails, the callback function intercepts the Python exception and logs the exact error message, timestamp, and status directly into the `dwh.etl_logs` table.
+-    Robust event handling and monitoring are implemented leveraging Airflow Callbacks (on_success_callback, on_failure_callback). In the event of a DAG failure, the callback function intercepts the Python exception and logs the exact error message, timestamp, and status directly into a dedicated dwh.etl_logs table for streamlined debugging and observability.
     
 
 ### 5. BI Platform Independence
 
-To bypass Microsoft Power BI's strict corporate email licensing restrictions (which block local/personal testing), **Metabase** was deployed directly within the Docker network. The Star Schema is fully realized at the DWH level, proving that the data model is BI-agnostic.
+The Star Schema is fully realized at the DWH level, ensuring the data model is completely BI-agnostic and ready for integration with any visualization tool. For this infrastructure, Metabase was chosen and deployed directly within the Docker network. This provides a lightweight, self-contained BI solution that integrates seamlessly with the containerized environment, bypassing the need for external cloud dependencies or complex licensing setups.
 
 ----------
 
