@@ -1,4 +1,4 @@
-[![en](https://img.shields.io/badge/lang-ru-green.svg)](README.md)
+[![en](https://img.shields.io/badge/lang-en-green.svg)](README.md)
 
 # Хранилище данных  и ETL-пайплайн
 
