@@ -7,6 +7,8 @@ services:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: password
       POSTGRES_DB: operational_db
+      TZ: UTC
+      PGTZ: UTC
     ports:
       - "5432:5432"
     volumes:
@@ -20,6 +22,8 @@ services:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: password
       POSTGRES_DB: data_warehouse
+      TZ: UTC
+      PGTZ: UTC
     ports:
       - "5433:5432" 
     volumes:
@@ -35,6 +39,8 @@ services:
       - AIRFLOW__CORE__LOAD_EXAMPLES=False
       - AIRFLOW_CONN_PG_SOURCE_CONN=postgresql://admin:password@pg_source:5432/operational_db
       - AIRFLOW_CONN_PG_DWH_CONN=postgresql://admin:password@pg_dwh:5432/data_warehouse
+      - TZ=UTC
+      - PGTZ=UTC
     volumes:
       - ./dags:/opt/airflow/dags
       - ./scripts:/opt/airflow/scripts

@@ -78,7 +78,6 @@ with DAG(
         sql="""
             TRUNCATE TABLE stg.stg_fact_sales, stg.stg_dim_customers, stg.stg_dim_products, stg.rejected_sales CASCADE;
 
-            -- Remove spaces, capitalize, and eliminate possible duplicates
             INSERT INTO stg.stg_dim_customers 
             SELECT DISTINCT ON (id) id, TRIM(name), UPPER(country) 
             FROM mrr.mrr_dim_customers 
