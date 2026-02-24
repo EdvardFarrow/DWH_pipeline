@@ -42,14 +42,12 @@ The architecture utilizes PostgreSQL schemas (mrr, stg, dwh) within a single DWH
 
 ### 3. Data Quality & Dead Letter Queue 
 
-Instead of silently dropping invalid data during the STG phase, a **Dead Letter Queue** pattern is implemented.
-
--   Sales with a negative or zero quantity (`qty <= 0`) are routed to `stg.rejected_sales` for data auditing, ensuring zero silent data loss.
+To maintain high data integrity, a Dead Letter Queue (DLQ) pattern is implemented during the staging (STG) phase. Invalid records (e.g., sales with qty <= 0) are not silently dropped; instead, they are routed to a dedicated stg.rejected_sales table for data auditing and further analysis, ensuring zero silent data loss.
     
 
 ### 4. Event Handlers & Logging
 
--    Robust event handling and monitoring are implemented leveraging Airflow Callbacks (on_success_callback, on_failure_callback). In the event of a DAG failure, the callback function intercepts the Python exception and logs the exact error message, timestamp, and status directly into a dedicated dwh.etl_logs table for streamlined debugging and observability.
+Robust event handling and monitoring are implemented leveraging Airflow Callbacks (on_success_callback, on_failure_callback). In the event of a DAG failure, the callback function intercepts the Python exception and logs the exact error message, timestamp, and status directly into a dedicated dwh.etl_logs table for streamlined debugging and observability.
     
 
 ### 5. BI Platform Independence
